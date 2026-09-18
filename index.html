@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Una historia para ti</title>
+
+    <!-- Fuentes elegantes desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================
+           CONFIGURACIÓN GENERAL
+        ========================== */
+
+        :root {
+            --morado: #9b5de5;
+            --morado-claro: #c77dff;
+            --violeta: #6a0dad;
+            --negro: #08050d;
+            --blanco: #f8f3ff;
+            --gris: #c9bfd4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #08050d;
+            color: var(--blanco);
+        }
+
+        /* =========================
+           FONDO ANIMADO
+        ========================== */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(112, 44, 180, 0.20), transparent 35%),
+                radial-gradient(circle at 80% 80%, rgba(88, 25, 145, 0.18), transparent 40%),
+                linear-gradient(135deg, #08050d, #13091d, #09050f);
+        }
+
+        .background::before,
+        .background::after {
+            content: "";
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.12;
+            animation: floatingGlow 12s ease-in-out infinite alternate;
+        }
+
+        .background::before {
+            background: #a855f7;
+            top: -180px;
+            left: -150px;
+        }
+
+        .background::after {
+            background: #7c3aed;
+            bottom: -200px;
+            right: -150px;
+            animation-delay: 3s;
+        }
+
+        @keyframes floatingGlow {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(80px, 50px) scale(1.2); }
+        }
+
+        /* Partículas */
+
+        #particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #d8b4fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #c084fc;
+            opacity: 0;
+            animation: sparkle linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% {
+                opacity: 0;
+                transform: translateY(0);
+            }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.5; }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        /* =========================
+           CONTENEDOR DE PANTALLAS
+        ========================== */
+
+        .screen {
+            min-height: 100vh;
+            width: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+        }
+
+        /* =========================
+           TEXTOS
+        ========================== */
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--morado-claro);
+            margin-bottom: 18px;
+            opacity: 0.85;
+        }
+
+        h1, h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(48px, 9vw, 82px);
+            color: white;
+            text-shadow: 0 0 30px rgba(192, 132, 252, 0.35);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-size: clamp(40px, 7vw, 65px);
+            margin-bottom: 30px;
+            color: #f5eaff;
+        }
+
+        .script {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(42px, 8vw, 70px);
+            color: var(--morado-claro);
+            text-shadow: 0 0 20px rgba(192, 132, 252, 0.4);
+        }
+
+        .subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 23px;
+            color: var(--gris);
+            line-height: 1.5;
+            margin-bottom: 35px;
+        }
+
+        .message-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(20px, 3vw, 25px);
+            line-height: 1.65;
+            color: #eee5f7;
+            text-align: left;
+        }
+
+        .message-text p {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: var(--morado-claro);
+        }
+
+        /* =========================
+           TARJETAS
+        ========================== */
+
+        .card {
+            position: relative;
+            background: rgba(20, 12, 29, 0.72);
+            border: 1px solid rgba(192, 132, 252, 0.22);
+            border-radius: 24px;
+            padding: clamp(30px, 6vw, 60px);
+            box-shadow:
+                0 0 50px rgba(107, 33, 168, 0.12),
+                inset 0 0 30px rgba(255,255,255,0.015);
+            backdrop-filter: blur(15px);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(199,125,255,0.3), transparent, rgba(124,58,237,0.2));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* =========================
+           INPUT Y BOTONES
+        ========================== */
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        input {
+            width: 100%;
+            max-width: 280px;
+            padding: 16px 20px;
+            border: 1px solid rgba(199, 125, 255, 0.35);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        input:focus {
+            border-color: var(--morado-claro);
+            box-shadow: 0 0 20px rgba(192,132,252,0.2);
+        }
+
+        input::placeholder {
+            color: #91869c;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            letter-spacing: 1px;
+            font-weight: 500;
+            transition: all 0.35s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 15px 38px;
+            border-radius: 50px;
+            color: white;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            box-shadow: 0 0 20px rgba(168,85,247,0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(192,132,252,0.5);
+        }
+
+        .btn-outline {
+            padding: 14px 35px;
+            border-radius: 50px;
+            color: #d8b4fe;
+            background: transparent;
+            border: 1px solid rgba(192,132,252,0.5);
+        }
+
+        .btn-outline:hover {
+            background: rgba(168,85,247,0.12);
+            box-shadow: 0 0 20px rgba(168,85,247,0.25);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 35px;
+        }
+
+        /* =========================
+           MENSAJES DE ERROR
+        ========================== */
+
+        .error-message {
+            height: 25px;
+            margin-top: 15px;
+            color: #d8a7ff;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        /* =========================
+           PREGUNTA FINAL
+        ========================== */
+
+        .question-card {
+            padding: 55px 30px;
+        }
+
+        .question-card h2 {
+            font-size: clamp(38px, 8vw, 68px);
+        }
+
+        .yes-button {
+            min-width: 130px;
+            padding: 17px 40px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #9333ea, #c084fc);
+            color: white;
+            box-shadow: 0 0 25px rgba(168,85,247,0.4);
+            font-size: 16px;
+        }
+
+        .no-button {
+            min-width: 130px;
+            padding: 17px 40px;
+            border-radius: 50px;
+            background: transparent;
+            color: #d6c4e7;
+            border: 1px solid rgba(199,125,255,0.4);
+        }
+
+        .yes-button:hover,
+        .no-button:hover {
+            transform: scale(1.06);
+        }
+
+        /* =========================
+           CORAZONES
+        ========================== */
+
+        .heart {
+            position: fixed;
+            pointer-events: none;
+            color: #c084fc;
+            font-size: 20px;
+            animation: heartFloat 5s ease-in forwards;
+            z-index: 10;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5) rotate(0deg);
+            }
+            20% { opacity: 0.8; }
+            100% {
+                opacity: 0;
+                transform: translateY(-100vh) scale(1.3) rotate(25deg);
+            }
+        }
+
+        .divider {
+            width: 70px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #c084fc, transparent);
+            margin: 25px auto;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 600px) {
+            .screen {
+                padding: 20px 15px;
+            }
+
+            .card {
+                padding: 30px 22px;
+                border-radius: 18px;
+            }
+
+            .message-text {
+                font-size: 20px;
+                line-height: 1.55;
+            }
+
+            .button-group {
+                gap: 12px;
+            }
+
+            .yes-button,
+            .no-button {
+                min-width: 110px;
+                padding: 15px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Fondo y partículas -->
+    <div class="background"></div>
+    <div id="particles"></div>
+
+    <!-- =========================
+         PANTALLA 1: ACCESO
+    ========================== -->
+
+    <section id="screen1" class="screen active">
+        <div class="container">
+            <div class="eyebrow">Una pequeña historia</div>
+
+            <h1>Para alguien especial</h1>
+
+            <div class="divider"></div>
+
+            <p class="subtitle">
+                Hay cosas que a veces no sabemos decir en persona,<br>
+                así que decidí escribirlas.
+            </p>
+
+            <div class="card">
+                <p class="subtitle">
+                    Para acceder a este mensaje, introduce la fecha en que nos conocimos.
+                </p>
+
+                <div class="input-group">
+                    <input
+                        type="number"
+                        id="dateInput"
+                        placeholder="Introduce el número"
+                        autocomplete="off"
+                    >
+
+                    <button class="btn-primary" onclick="checkAccess()">
+                        Acceder
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="error-message">
+                    Ese no es el número correcto. Intenta nuevamente.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 2: PRIMER MENSAJE
+    ========================== -->
+
+    <section id="screen2" class="screen">
+        <div class="container">
+            <div class="eyebrow">Lo que nunca supe cómo decir</div>
+
+            <div class="card">
+                <h2 class="script">Perdóname si esto es demasiado</h2>
+
+                <div class="divider"></div>
+
+                <div class="message-text">
+                    <p>
+                        Ojalá puedas disculparme si todo esto parece demasiado. No es mi intención incomodarte ni hacerte sentir que tienes que responder algo que no sientes. Simplemente hay momentos en los que guardar todo lo que llevo dentro se vuelve más difícil de lo que imaginaba.
+                    </p>
+
+                    <p>
+                        Todavía me importas muchísimo, y me cuesta aceptar la distancia que existe entre nosotros. Extraño esos momentos que compartimos, las conversaciones, las miradas y esas pequeñas cosas que quizás para ti fueron simples, pero que para mí significaron mucho.
+                    </p>
+
+                    <p>
+                        A veces me duele pensar que quizá existe otra persona intentando acercarse a ti. Sé que no tengo derecho a decidir sobre tu vida ni sobre tus sentimientos, pero sería deshonesto decir que no me afecta. Quizá eso que siento puede parecer celos, inseguridad o miedo a perderte, y prefiero reconocerlo antes que fingir que no existe.
+                    </p>
+
+                    <p>
+                        Cuando te miro, todavía me pongo nervioso. Hay momentos en los que incluso siento que me tiemblan las manos, porque aunque intente aparentar tranquilidad, dentro de mí todavía hay demasiado que no sé cómo manejar.
+                    </p>
+
+                    <p>
+                        No quiero controlar tus decisiones, ni obligarte a nada. Solo quiero ser honesto contigo y conmigo mismo. No sé exactamente qué pasará con todo esto, pero necesitaba que supieras que aún hay una parte de mí que te extraña y que sigue sintiendo profundamente.
+                    </p>
+
+                    <p>
+                        Tal vez no sé expresar bien todo lo que pasa dentro de mí, pero espero que al menos puedas entender que estas palabras nacen de la sinceridad.
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="nextScreen(2, 3)">
+                        Continuar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 3: SEGUNDO MENSAJE
+    ========================== -->
+
+    <section id="screen3" class="screen">
+        <div class="container">
+            <div class="eyebrow">Lo que todavía siento</div>
+
+            <div class="card">
+                <h2 class="script">Aún te quiero</h2>
+
+                <div class="divider"></div>
+
+                <div class="message-text">
+                    <p>
+                        La verdad es que todavía te extraño. Todavía te quiero mucho y, si tengo que ser completamente sincero, incluso puedo decir que te amo.
+                    </p>
+
+                    <p>
+                        Amo tus ojos, tu sonrisa, tu forma de ser y esos pequeños detalles que probablemente no siempre notas, pero que te hacen especial para mí. Hay personas que llegan a nuestras vidas y dejan algo que no desaparece fácilmente, y tú eres una de esas personas.
+                    </p>
+
+                    <p>
+                        Aunque las cosas no hayan salido como esperaba, mis sentimientos siguen presentes. No significa que quiera cambiar lo que tú decides o que espere algo de ti por obligación. Solo significa que, a pesar del tiempo y de todo lo que ha pasado, sigues siendo importante para mí.
+                    </p>
+
+                    <p>
+                        No quiero que pienses que tienes una deuda conmigo por leer esto. No espero que me correspondas por compromiso ni que cambies tus decisiones para hacerme feliz.
+                    </p>
+
+                    <p>
+                        Solamente quería que supieras lo mucho que significas para mí. Y quizás, aunque no cambie nada, me quedo tranquilo sabiendo que por una vez fui capaz de decir lo que realmente siento.
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="nextScreen(3, 4)">
+                        Continuar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 4: LA PREGUNTA
+    ========================== -->
+
+    <section id="screen4" class="screen">
+        <div class="container">
+            <div class="card question-card">
+                <div class="eyebrow">Una pregunta sincera</div>
+
+                <h2>¿Quieres darle una oportunidad a lo nuestro?</h2>
+
+                <div class="divider"></div>
+
+                <p class="subtitle">
+                    No tienes que responder por presión. Solo quiero conocer lo que realmente sientes.
+                </p>
+
+                <div class="button-group">
+                    <button class="yes-button" onclick="answerYes()">
+                        Sí
+                    </button>
+
+                    <button class="no-button" onclick="answerNo()">
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 5: RESPUESTA SÍ
+    ========================== -->
+
+    <section id="screen5" class="screen">
+        <div class="container">
+            <div class="card">
+                <div class="eyebrow">Gracias por confiar en nosotros</div>
+
+                <h2 class="script">Una nueva oportunidad</h2>
+
+                <div class="divider"></div>
+
+                <div class="message-text">
+                    <p>
+                        Gracias por darme una oportunidad. De verdad significa mucho para mí.
+                    </p>
+
+                    <p>
+                        Te amo, y quiero demostrarte con hechos que puedo hacer las cosas mejor. No quiero prometerte un amor perfecto, porque sé que nadie es perfecto, pero sí quiero aprender, escucharte, respetarte y valorar cada momento que podamos compartir.
+                    </p>
+
+                    <p>
+                        Quiero cuidar lo que tenemos sin dejar de ser nosotros mismos. Quiero que podamos hablar cuando algo nos duela, reírnos de las cosas pequeñas y construir algo que tenga sinceridad y confianza.
+                    </p>
+
+                    <p>
+                        No quiero defraudarte. Sé que las palabras por sí solas no son suficientes, así que prefiero que el tiempo y mis acciones sean quienes demuestren lo que realmente quiero.
+                    </p>
+
+                    <p style="text-align:center; color:#c084fc;">
+                        Gracias por estar aquí.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 6: ¿ESTÁS SEGURA?
+    ========================== -->
+
+    <section id="screen6" class="screen">
+        <div class="container">
+            <div class="card question-card">
+                <div class="eyebrow">Antes de continuar</div>
+
+                <h2>¿Estás segura?</h2>
+
+                <div class="divider"></div>
+
+                <p class="subtitle">
+                    Solo quiero asegurarme de que tu respuesta sea realmente lo que deseas.
+                </p>
+
+                <div class="button-group">
+                    <button class="yes-button" onclick="answerYes()">
+                        Sí
+                    </button>
+
+                    <button class="no-button" onclick="answerNoAgain()">
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 7: ¿ERES FELIZ?
+    ========================== -->
+
+    <section id="screen7" class="screen">
+        <div class="container">
+            <div class="card question-card">
+                <div class="eyebrow">Una última pregunta</div>
+
+                <h2>¿Eres feliz con él?</h2>
+
+                <div class="divider"></div>
+
+                <p class="subtitle">
+                    Responde con sinceridad. Lo más importante es que estés bien.
+                </p>
+
+                <div class="button-group">
+                    <button class="yes-button" onclick="happyYes()">
+                        Sí
+                    </button>
+
+                    <button class="no-button" onclick="happyNo()">
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 8: RESPETO
+    ========================== -->
+
+    <section id="screen8" class="screen">
+        <div class="container">
+            <div class="card">
+                <div class="eyebrow">Con cariño y respeto</div>
+
+                <h2 class="script">Está bien</h2>
+
+                <div class="divider"></div>
+
+                <div class="message-text">
+                    <p>
+                        Está bien. Si eres feliz, lo entiendo.
+                    </p>
+
+                    <p>
+                        No volveré a molestarte. Gracias por todo lo que compartimos y por los momentos que alguna vez me hicieron feliz.
+                    </p>
+
+                    <p>
+                        Te deseo lo mejor de corazón. Ojalá encuentres siempre razones para sonreír y personas que valoren lo maravillosa que eres.
+                    </p>
+
+                    <p style="text-align:center; color:#c084fc;">
+                        Gracias por todo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- =========================
+         PANTALLA 9: FINAL ROMÁNTICO
+    ========================== -->
+
+    <section id="screen9" class="screen">
+        <div class="container">
+            <div class="card question-card">
+                <div class="eyebrow">Sin más palabras</div>
+
+                <h1 class="script">Te amo.</h1>
+
+                <div class="divider"></div>
+
+                <p class="subtitle">
+                    Y aunque no sé qué nos depara el futuro,<br>
+                    siempre guardaré con cariño todo lo que sentí por ti.
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+
+        /* =========================
+           CREACIÓN DE PARTÍCULAS
+        ========================== */
+
+        const particlesContainer = document.getElementById("particles");
+
+        function createParticles() {
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement("div");
+                particle.classList.add("particle");
+
+                particle.style.left = Math.random() * 100 + "%";
+                particle.style.top = Math.random() * 100 + "%";
+
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + "px";
+                particle.style.height = size + "px";
+
+                particle.style.animationDuration = (Math.random() * 6 + 4) + "s";
+                particle.style.animationDelay = (Math.random() * 5) + "s";
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+
+        /* =========================
+           CAMBIO DE PANTALLAS
+        ========================== */
+
+        function nextScreen(current, next) {
+            const currentScreen = document.getElementById("screen" + current);
+            const nextScreenElement = document.getElementById("screen" + next);
+
+            currentScreen.classList.remove("active");
+
+            setTimeout(() => {
+                nextScreenElement.classList.add("active");
+                window.scrollTo(0, 0);
+            }, 400);
+        }
+
+
+        /* =========================
+           VALIDACIÓN DEL NÚMERO 11
+        ========================== */
+
+        function checkAccess() {
+            const input = document.getElementById("dateInput");
+            const error = document.getElementById("errorMessage");
+
+            if (input.value.trim() === "11") {
+                error.classList.remove("show");
+
+                setTimeout(() => {
+                    nextScreen(1, 2);
+                }, 200);
+
+                createHearts(6);
+
+            } else {
+                error.classList.add("show");
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        // Permitir presionar Enter en el campo
+        document.getElementById("dateInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkAccess();
+            }
+        });
+
+
+        /* =========================
+           RESPUESTAS DE LA PREGUNTA
+        ========================== */
+
+        function answerYes() {
+            createHearts(18);
+            nextScreen(4, 5);
+        }
+
+        function answerNo() {
+            nextScreen(4, 6);
+        }
+
+        function answerNoAgain() {
+            nextScreen(6, 7);
+        }
+
+        function happyYes() {
+            nextScreen(7, 8);
+        }
+
+        function happyNo() {
+            createHearts(25);
+            nextScreen(7, 9);
+        }
+
+
+        /* =========================
+           ANIMACIÓN DE CORAZONES
+        ========================== */
+
+        function createHearts(amount) {
+            for (let i = 0; i < amount; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement("div");
+                    heart.classList.add("heart");
+                    heart.innerHTML = "♥";
+
+                    heart.style.left = Math.random() * 100 + "vw";
+                    heart.style.bottom = "-30px";
+                    heart.style.fontSize = (Math.random() * 18 + 12) + "px";
+                    heart.style.animationDuration = (Math.random() * 3 + 4) + "s";
+
+                    document.body.appendChild(heart);
+
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 6000);
+                }, i * 120);
+            }
+        }
+
+    </script>
+
+</body>
+</html>
